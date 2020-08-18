@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { render } from "react-dom";
 import {
   motion,
@@ -9,8 +10,25 @@ import {
 
 import "./styles.css";
 
+const SideContent = (props) => (
+  <motion.div
+    key={props.key}
+    style={{ scale: props.scaleWhileWordMoves }}
+    className="content"
+    whileHover={{ scale: props.scaleWhileHover }}
+    onClick={props.onClick}
+    exit={{ x: props.side === "left" ? "-100vw" : "100vw" }}
+    animate={{ x: 0 }}
+    initial={{ x: props.side === "left" ? "-100vw" : "100vw" }}
+  >
+    <p>{props.text}</p>
+  </motion.div>
+);
+
 const App = () => {
-  const [state, setState] = React.useState("question");
+  const word = "meisje";
+  const rightArticle = "het";
+  const [chosenArticle, setChosenArticle] = useState(null);
   const x = useMotionValue(0);
   const deScale = useTransform(x, (x) =>
     x < -80 ? Math.min(1 + (-x - 80) / 40, 1.4) : 1
@@ -19,41 +37,36 @@ const App = () => {
     x > 80 ? Math.min(1 + (x - 80) / 40, 1.4) : 1
   );
 
+  const handleAnswerChoise = (article) => {
+    setChosenArticle(article);
+  };
+
+  const playAgain = () => {
+    setChosenArticle(null);
+  };
+
   return (
     <>
       <div className="top-container">
         <AnimatePresence exitBeforeEnter>
-          {state === "question" && (
-            <motion.div
+          {chosenArticle === null && (
+            <SideContent
+              scaleWhileHover={1.4}
+              scaleWhileWordMoves={deScale}
+              onClick={() => handleAnswerChoise("de")}
+              text="de"
               key="de"
-              style={{ scale: deScale }}
-              className="content"
-              whileHover={{ scale: 1.4 }}
-              onClick={() => {
-                setState("answer");
-              }}
-              exit={{ x: "-100vw" }}
-              animate={{ x: 0 }}
-              initial={{ x: "-100vw" }}
-            >
-              <p>de</p>
-            </motion.div>
+              side="left"
+            />
           )}
-          {state === "answer" && (
-            <motion.div
+          {chosenArticle !== null && (
+            <SideContent
+              scaleWhileHover={1}
+              scaleWhileWordMoves={1}
+              text={chosenArticle === rightArticle ? "Right!" : "Wrong!"}
               key="answer"
-              style={{ scale: deScale }}
-              className="content"
-              whileHover={{ scale: 1.4 }}
-              onClick={() => {
-                setState("question");
-              }}
-              exit={{ x: "-100vw" }}
-              animate={{ x: 0 }}
-              initial={{ x: "-100vw" }}
-            >
-              <p>answer</p>
-            </motion.div>
+              side="left"
+            />
           )}
         </AnimatePresence>
       </div>
@@ -65,17 +78,32 @@ const App = () => {
           dragElastic={1}
           style={{ x }}
         >
-          <p>meisje</p>
+          <p>{word}</p>
         </motion.div>
       </div>
       <div className="bottom-container">
-        <motion.div
-          style={{ scale: hetScale }}
-          className="content"
-          whileHover={{ scale: 1.4 }}
-        >
-          <p>het</p>
-        </motion.div>
+        <AnimatePresence exitBeforeEnter>
+          {chosenArticle === null && (
+            <SideContent
+              scaleWhileHover={1.4}
+              scaleWhileWordMoves={hetScale}
+              onClick={() => handleAnswerChoise("het")}
+              text="het"
+              key="het"
+              side="right"
+            />
+          )}
+          {chosenArticle !== null && (
+            <SideContent
+              scaleWhileHover={1.4}
+              scaleWhileWordMoves={1}
+              onClick={() => playAgain()}
+              text="Play again!"
+              key="continue"
+              side="right"
+            />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

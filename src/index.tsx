@@ -10,12 +10,25 @@ import {
 
 import "./styles.css";
 
+const variants = {
+  exit: (chosenArticle) => {
+    return {
+      zIndex: 0,
+      x: chosenArticle === "de" ? -1000 : 1000,
+      opacity: 0
+    };
+  },
+  initial: { scale: 0.3 },
+  animate: { scale: 1 }
+};
+
 const SideContent = (props) => (
   <motion.div
     key={props.key}
     style={{ scale: props.scaleWhileWordMoves }}
     className="content"
-    whileHover={{ scale: props.scaleWhileHover }}
+    whileHover={{ scale: props.scaleWhileHoverOrTap }}
+    whileTap={{ scale: props.scaleWhileHoverOrTap }}
     onClick={props.onClick}
     exit={{ x: props.side === "left" ? "-100vw" : "100vw" }}
     animate={{ x: 0 }}
@@ -29,6 +42,7 @@ const App = () => {
   const word = "meisje";
   const rightArticle = "het";
   const [chosenArticle, setChosenArticle] = useState(null);
+  const [gamesCounter, setGamesCounter] = useState(0);
   const x = useMotionValue(0);
   const deScale = useTransform(x, (x) =>
     x < -80 ? Math.min(1 + (-x - 80) / 40, 1.4) : 1
@@ -42,7 +56,9 @@ const App = () => {
   };
 
   const playAgain = () => {
+    x.set(0);
     setChosenArticle(null);
+    setGamesCounter(gamesCounter + 1);
   };
 
   return (
@@ -51,7 +67,7 @@ const App = () => {
         <AnimatePresence exitBeforeEnter>
           {chosenArticle === null && (
             <SideContent
-              scaleWhileHover={1.4}
+              scaleWhileHoverOrTap={1.4}
               scaleWhileWordMoves={deScale}
               onClick={() => handleAnswerChoise("de")}
               text="de"
@@ -61,7 +77,7 @@ const App = () => {
           )}
           {chosenArticle !== null && (
             <SideContent
-              scaleWhileHover={1}
+              scaleWhileHoverOrTap={1}
               scaleWhileWordMoves={1}
               text={chosenArticle === rightArticle ? "Right!" : "Wrong!"}
               key="answer"
@@ -71,21 +87,39 @@ const App = () => {
         </AnimatePresence>
       </div>
       <div className="middle-container">
-        <motion.div
-          className="content"
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={1}
-          style={{ x }}
-        >
-          <p>{word}</p>
-        </motion.div>
+        <AnimatePresence custom={chosenArticle}>
+          {chosenArticle === null && (
+            <motion.div
+              key={"word" + gamesCounter}
+              className="content"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={1}
+              style={{ x }}
+              variants={variants}
+              exit="exit"
+              initial="initial"
+              animate="animate"
+              custom={chosenArticle}
+              onDragEnd={(e, { offset, velocity }) => {
+                if (offset.x < -96) {
+                  setChosenArticle("de");
+                }
+                if (offset.x > 96) {
+                  setChosenArticle("het");
+                }
+              }}
+            >
+              <p>{word}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div className="bottom-container">
         <AnimatePresence exitBeforeEnter>
           {chosenArticle === null && (
             <SideContent
-              scaleWhileHover={1.4}
+              scaleWhileHoverOrTap={1.4}
               scaleWhileWordMoves={hetScale}
               onClick={() => handleAnswerChoise("het")}
               text="het"
@@ -95,7 +129,7 @@ const App = () => {
           )}
           {chosenArticle !== null && (
             <SideContent
-              scaleWhileHover={1.4}
+              scaleWhileHoverOrTap={1.4}
               scaleWhileWordMoves={1}
               onClick={() => playAgain()}
               text="Play again!"

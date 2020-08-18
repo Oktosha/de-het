@@ -59,6 +59,12 @@ div, p {
 .middle-container .content {
   border-radius: 40px;
   padding: 30px;
+  text-align: center;
+}
+
+.middle-container .content span {
+  font-weight: 300;
+  font-style: italic;
 }
 
 .bottom-container .content {

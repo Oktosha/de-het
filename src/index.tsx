@@ -39,10 +39,17 @@ const SideContent = (props) => (
 );
 
 const App = () => {
-  const word = "meisje";
-  const rightArticle = "het";
+  const wordsWithArticlesAndTranslations = [
+    { word: "kat", article: "de", translation: "cat" },
+    { word: "hond", article: "de", translation: "dog" }
+  ];
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const word = wordsWithArticlesAndTranslations[currentWordIndex].word;
+  const rightArticle =
+    wordsWithArticlesAndTranslations[currentWordIndex].article;
+  const translation =
+    wordsWithArticlesAndTranslations[currentWordIndex].translation;
   const [chosenArticle, setChosenArticle] = useState(null);
-  const [gamesCounter, setGamesCounter] = useState(0);
   const x = useMotionValue(0);
   const deScale = useTransform(x, (x) =>
     x < -80 ? Math.min(1 + (-x - 80) / 40, 1.4) : 1
@@ -58,7 +65,9 @@ const App = () => {
   const playAgain = () => {
     x.set(0);
     setChosenArticle(null);
-    setGamesCounter(gamesCounter + 1);
+    setCurrentWordIndex(
+      (currentWordIndex + 1) % wordsWithArticlesAndTranslations.length
+    );
   };
 
   return (
@@ -90,7 +99,7 @@ const App = () => {
         <AnimatePresence custom={chosenArticle}>
           {chosenArticle === null && (
             <motion.div
-              key={"word" + gamesCounter}
+              key={currentWordIndex}
               className="content"
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
@@ -110,7 +119,11 @@ const App = () => {
                 }
               }}
             >
-              <p>{word}</p>
+              <p>
+                {word}
+                <br />
+                <span>{translation}</span>
+              </p>
             </motion.div>
           )}
         </AnimatePresence>

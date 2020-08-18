@@ -1,8 +1,12 @@
 {
   "name": "de-or-het",
   "version": "1.0.0",
-  "description": "A live, editable example of the Framer Motion API",
-  "keywords": [],
+  "description": "A game prototype where you choose the right article for a Dutch word. You can click on the article or swipe the word towards one.",
+  "keywords": [
+    "react",
+    "framer-motion",
+    "animation"
+  ],
   "main": "src/index.tsx",
   "dependencies": {
     "framer-motion": "2.4.2",
